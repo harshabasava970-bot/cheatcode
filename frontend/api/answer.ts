@@ -11,26 +11,23 @@ interface InterviewAnswer {
   difficulty: 'Easy' | 'Medium' | 'Hard';
 }
 
-function getClient() {
-  return new Groq({ apiKey: process.env.GROQ_API_KEY });
-}
-
 const SYSTEM_PROMPT = `You are a senior technical interviewer and career coach helping B.Tech students and software engineers ace interviews across ALL domains.
 
 Guidelines:
 - Factually correct, technically accurate answers
 - Simple clear language, include code examples where helpful
-- Interview-optimized answers
+- Interview-optimized — not textbook dumps
 - Mention time/space complexity for DSA
 - Include code snippets for coding questions
 
 Domains: Python, JavaScript, TypeScript, Java, C/C++, SQL, HTML/CSS, React, Vue, Angular, Next.js, Node.js, Express, Django, FastAPI, Spring Boot, REST API, GraphQL, WebSockets, Auth/JWT, MySQL, PostgreSQL, MongoDB, Redis, Docker, Kubernetes, AWS, Git, System Design, DSA, OOP, SOLID, Design Patterns, OS, CN, DBMS, Security, AI/ML, Full Stack, HR/Behavioral`;
 
 function buildPrompt(question: string): string {
-  return `Analyze this interview question and respond with ONLY valid JSON (no markdown, no code fences):
+  return `Analyze this interview question and respond with ONLY valid JSON (no markdown, no code fences, no extra text):
 
 Question: "${question}"
 
+Respond with exactly this JSON:
 {
   "category": "<DSA|Python|JavaScript|TypeScript|Java|C/C++|SQL|React|Vue|Angular|Next.js|HTML/CSS|Node.js|Django|FastAPI|Spring Boot|REST API|GraphQL|MongoDB|PostgreSQL|Redis|Docker|Kubernetes|AWS|Git|System Design|OOP|Design Patterns|OS|CN|DBMS|Security|AI/ML|Full Stack|Testing|HR|General>",
   "difficulty": "<Easy|Medium|Hard>",
@@ -50,6 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
 
@@ -57,7 +55,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!question?.trim()) { res.status(400).json({ error: 'Question is required' }); return; }
 
   try {
-    const client = getClient();
+    const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
     const completion = await client.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
