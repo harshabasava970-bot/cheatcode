@@ -27,7 +27,7 @@ app.get('/api/health', (_req, res) => {
     status: 'ok',
     message: 'Interview Assistant API is running',
     timestamp: new Date().toISOString(),
-    openaiConfigured: !!process.env.OPENAI_API_KEY,
+    geminiConfigured: !!process.env.GEMINI_API_KEY,
   });
 });
 
@@ -39,7 +39,7 @@ app.use((_req, res) => {
 app.listen(PORT, () => {
   console.log(`\n🚀 Interview Assistant API running on http://localhost:${PORT}`);
   console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🔑 OpenAI API Key: ${process.env.OPENAI_API_KEY ? '✅ Configured' : '❌ Not configured'}\n`);
+  console.log(`🔑 Groq API Key: ${process.env.GROQ_API_KEY ? '✅ Configured' : '❌ Not configured'}\n`);
 });
 
 export default app;
